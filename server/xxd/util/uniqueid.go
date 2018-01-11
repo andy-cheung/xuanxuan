@@ -10,14 +10,13 @@
 package util
 
 import (
-	"os"
-	"log"
 	"io/ioutil"
+	"os"
 )
 
 func CreatUid(serverName string, userID int64, key string) error {
 
-	url := Config.LogPath+"/"+serverName+"/"
+	url := Config.LogPath + "/" + serverName + "/"
 
 	if err := Mkdir(url); err != nil {
 		LogError().Println("mkdir error %s\n", err)
@@ -26,10 +25,10 @@ func CreatUid(serverName string, userID int64, key string) error {
 
 	fileName := url + Int642String(userID)
 
-	fout,err := os.Create(fileName)
+	fout, err := os.Create(fileName)
 	defer fout.Close()
 	if err != nil {
-		LogError().Println("Create file error",fileName,err)
+		LogError().Println("Create file error", fileName, err)
 		return err
 	}
 
@@ -38,22 +37,22 @@ func CreatUid(serverName string, userID int64, key string) error {
 	return nil
 }
 
-func GetUid(serverName string, userID string) (string,error) {
-	url := Config.LogPath+"/"+serverName+"/"+ userID
+func GetUid(serverName string, userID string) (string, error) {
+	url := Config.LogPath + "/" + serverName + "/" + userID
 
 	file, err := os.Open(url)
 	if err != nil {
-		log.Fatal(err)
+		LogError().Println(err)
 	}
 	data, err := ioutil.ReadAll(file)
 	if err != nil {
-		log.Fatal(err)
+		LogError().Println(err)
 	}
-	return string(data),nil
+	return string(data), err
 }
 
 func DelUid(serverName string, userID string) error {
-	url := Config.LogPath+"/"+serverName+"/"+ userID
+	url := Config.LogPath + "/" + serverName + "/" + userID
 	err := Rm(url)
 	if err != nil {
 		return err

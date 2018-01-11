@@ -13,9 +13,10 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/gorilla/websocket"
 	"xxd/api"
 	"xxd/util"
+
+	"github.com/gorilla/websocket"
 )
 
 const (
@@ -120,8 +121,6 @@ func chatLogin(parseData api.ParseData, client *Client) error {
 		client.send <- loginData
 		return util.Errorf("%s", "chat login error")
 	}
-	// 成功后返回login数据给客户端
-	client.send <- loginData
 
 	client.userID = userID
 	client.serverName = parseData.ServerName()
@@ -130,14 +129,17 @@ func chatLogin(parseData api.ParseData, client *Client) error {
 	}
 
 	// 生成并存储文件会员
-    userFileSessionID , err := api.UserFileSessionID(client.serverName, client.userID)
-    if err != nil {
-        util.LogError().Println("chat user get user list error:", err)
-        //返回给客户端登录失败的错误信息
-        return err
-    }
-    // 成功后返回userFileSessionID数据给客户端
-    client.send <- userFileSessionID
+	userFileSessionID, err := api.UserFileSessionID(client.serverName, client.userID)
+	if err != nil {
+		util.LogError().Println("chat user get user list error:", err)
+		//返回给客户端登录失败的错误信息
+		return err
+	}
+
+	// 成功后返回login数据给客户端
+	client.send <- loginData
+	// 成功后返回userFileSessionID数据给客户端
+	client.send <- userFileSessionID
 
 	// 获取所有用户列表
 	usergl, err := api.UserGetlist(client.serverName, client.userID)
@@ -197,7 +199,7 @@ func chatLogout(userID int64, client *Client) error {
 	if err != nil {
 		return err
 	}
-  util.DelUid(client.serverName,util.Int642String(client.userID))
+	util.DelUid(client.serverName, util.Int642String(client.userID))
 	return X2cSend(client.serverName, sendUsers, x2cMessage, client)
 }
 
@@ -322,8 +324,8 @@ func (c *Client) writePump() {
 
 // serveWs handles websocket requests from the peer.
 func serveWs(hub *Hub, w http.ResponseWriter, r *http.Request) {
-  // Delete origin header @see https://www.iphpt.com/detail/86/
-  r.Header.Del("Origin")
+	// Delete origin header @see https://www.iphpt.com/detail/86/
+	r.Header.Del("Origin")
 
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
