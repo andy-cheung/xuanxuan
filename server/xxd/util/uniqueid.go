@@ -43,10 +43,12 @@ func GetUid(serverName string, userID string) (string, error) {
 	file, err := os.Open(url)
 	if err != nil {
 		LogError().Println(err)
+		return "", err
 	}
 	data, err := ioutil.ReadAll(file)
 	if err != nil {
 		LogError().Println(err)
+		return "", err
 	}
 	return string(data), err
 }
